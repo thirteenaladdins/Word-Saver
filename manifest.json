@@ -1,0 +1,33 @@
+{
+
+"manifest_version": 2,
+"name": "Word Saver",
+"description": "Save new words you find on your travels.",
+"author": "Muhammad Amer",
+"version": "1.0",
+
+"browser_action": {
+	"default_popup": "popup.html"
+
+},
+
+"background": {
+	"scripts": ["eventPage.js"],
+	"persistent": true
+	// "page":"background.html"
+},
+
+// "background": {
+//     "page": "background.html"
+//  },
+
+"permissions": [
+	"storage",
+	"notifications",
+	"contextMenus",
+	"tabs",
+	"activeTab",
+    "https://www.google.com/"
+	]
+
+}
