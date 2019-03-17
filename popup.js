@@ -4,13 +4,11 @@
 // there's still an issue with removing items from the dict
 // where they're not actually being removed or something is being added when it shouldn't be
 
-getDictAndRestoreInDom();
-
-chrome.storage.onChanged.addListener(function() {
-    addNewElement();
-})
+// removeIndex
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    getDictAndRestoreInDom();
     // document.getElementById('clearAll').addEventListener('click', function() {
     //     chrome.storage.local.clear();
     //     let fullDict = document.getElementsByClassName('collapsible');
@@ -19,24 +17,39 @@ document.addEventListener('DOMContentLoaded', function() {
     //         // removeWordAndSave();
     //     }
     // })
+    
 
     let right = document.getElementById('feather-arrow');
     right.addEventListener('click', function() {
-        // alert("god");
+        // chrome.browserAction.setPopup({popup: "settings.html"})
+
+
+
     })
 
-    // let checkcheck = document.getElementById("checkDict");
-    // checkcheck.addEventListener('click', function() {
-    //     chrome.storage.local.get({dictionary:[]
-    //     }, function(data) {
-    //         dictionary = data.dictionary;
-    //         console.log(dictionary);
-    //     })
-    // })
+    // let classList = document.getElementsByClassName('content');
+    // console.log(classList);
+})
 
-    // let cursorPosition = document.getElementById('search');
-    // cursorPosition.selectionStart(5);
+chrome.extension.onMessage.addListener(function(request, sender) {
+    let classList = document.getElementsByClassName('word');
+    console.log(classList);
+    for (let i = 0; i < classList.length; i++) {
+        if (request.greeting == classList[i].innerText) {
+            classList[i].parentNode.parentNode.remove();
+        }
+    }
+})
 
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+    for (var key in changes) {
+          var storageChange = changes[key];
+          console.log(storageChange.newValue.length, storageChange.oldValue.length)
+
+      if (storageChange.newValue.length > storageChange.oldValue.length) {
+            addNewElement();
+        }
+    }
 })
 
 function addNewElement() {
@@ -74,14 +87,26 @@ function searchDict(searchQuery) {
 
 }
 
-
-
-
 function addWordToDom(word) {
     let newContainer = document.createElement('li');
     newContainer.className = "collapsible";
-    // newContainer.addEventListener('click', function() {
-    // })
+
+
+    newContainer.addEventListener('click', function() {
+
+        this.classList.toggle('expand');
+        // console.log(this);
+        // select this part of the 
+        // this.toggle('expand');
+
+        // if the height is 20% then set it to none
+        // if height is none or isn't specified 
+        // set to 20%
+        // I know how to do this. 
+        // right here we click and minimise the 
+    })
+    // let checker = document.createElement('checkbox');
+
 
     let newEntry = document.createElement("li");
     newEntry.className = "content";
@@ -90,8 +115,8 @@ function addWordToDom(word) {
     removeButton.setAttribute("viewBox", "0 0 24 24");
     removeButton.setAttribute("class", "remove");
     removeButton.addEventListener('click', function() {
-        this.parentNode.parentNode.remove();
         removeWordAndSave(word);
+        this.parentNode.parentNode.remove();
     })
 
     let newLine = document.createElementNS('http://www.w3.org/2000/svg','line');

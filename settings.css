@@ -1,0 +1,13 @@
+* {
+	margin:0px;
+	padding: 0px;
+}
+
+#container {
+    box-sizing: border-box;
+    width: 300px;
+    max-height: 440px;
+    height: 440px;
+    padding: 4px;
+    padding-top:0px;
+}

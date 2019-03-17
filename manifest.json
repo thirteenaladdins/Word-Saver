@@ -12,7 +12,7 @@
 },
 
 "background": {
-	"scripts": ["eventPage.js"],
+	"scripts": ["background.js"],
 	"persistent": true
 	// "page":"background.html"
 },
