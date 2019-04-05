@@ -7,9 +7,6 @@ div {
     list-style-type: none;
 }
 
-/*the class names are confusing me so I'll have to sort those out after*/
-/*javascript class name tracker? Somehow that could be helpful.*/
-
 #container {
     box-sizing: border-box;
     width: 300px;
@@ -36,19 +33,23 @@ div {
     overflow: hidden;
     position: relative;
     width: 98%;
-    max-height: 95px;
+    max-height: 85px;
     margin-bottom: 2px;
     background: ghostwhite;
-    transition: all .3s ease;
+    transition: background .3s;
+    -webkit-transition: background .3s;
+    -moz-transition: background .3s;
 }
 
 .collapsible.expand {
-    transition: all .3s ease;
+    /*transition: all .3s ease;*/
      max-height: none;     
 }
 
 .collapsible:hover {
-
+    /*border-style: solid;*/
+    /*border-color: orange;*/
+    /*border-width: 1.5px;*/
     cursor: pointer;
 }
 
@@ -75,17 +76,21 @@ div {
 
 .word {
     display: inline-block;
-    font-size: 2em;
+    font-size: 1.7em;
 }
 
 
 .phonetic {
     display: inline-block;
-    font-size: 1.5em
+    font-size: 1.2em
 }
 
 .example {
     color: grey;
+}
+
+.reference {
+    color: black;
 }
 
 .type {
@@ -114,6 +119,7 @@ div {
     stroke-linejoin: round;
     stroke-width: 2;
     cursor: pointer;
+    /*z-index: 1000;*/
 }
 
 .remove:hover .feather {
@@ -151,7 +157,7 @@ div {
 ::-webkit-scrollbar {
     width: 4px;
 }
-
+s
 ::-webkit-scrollbar-thumb {
     width: 4px;
     border-radius: 8px;

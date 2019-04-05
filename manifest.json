@@ -1,33 +1,36 @@
 {
+    "manifest_version": 2,
+    "name": "Little Dictionary",
+    "author": "Mo Amer, First of his Name",
+    "description": "Save words you find on your travels",
+    "version": "1.0",
 
-"manifest_version": 2,
-"name": "Word Saver",
-"description": "Save new words you find on your travels.",
-"author": "Muhammad Amer",
-"version": "1.0",
+    "browser_action":
+    {
+        "default_popup": "popup.html"
 
-"browser_action": {
-	"default_popup": "popup.html"
+    },
 
-},
+    "background":
+    {
+        "scripts": ["background.js"],
+        "persistent": true
+    },
 
-"background": {
-	"scripts": ["background.js"],
-	"persistent": true
-	// "page":"background.html"
-},
+    "content_scripts": [
+    {
+        "matches": ["<all_urls>"],
+        // "css": ["myStyles.css"],
+        "js": ["mark.es6.js", "content.js"]
+    }],
 
-// "background": {
-//     "page": "background.html"
-//  },
-
-"permissions": [
-	"storage",
-	"notifications",
-	"contextMenus",
-	"tabs",
-	"activeTab",
-    "https://www.google.com/"
-	]
-
+    "permissions": [
+        "storage",
+        "notifications",
+        "contextMenus",
+        "tabs",
+        "activeTab",
+        "https://www.google.com/",
+        "https://od-api.oxforddictionaries.com/*"
+    ]
 }
