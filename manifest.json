@@ -1,26 +1,22 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "Little Dictionary",
     "author": "Mo Amer, First of his Name",
     "description": "Save words you find on your travels",
     "version": "1.0",
 
-    "browser_action":
+    "action":
     {
         "default_popup": "popup.html"
 
     },
 
-    "background":
-    {
-        "scripts": ["background.js"],
-        "persistent": true
-    },
-
+    "background": {
+        "service_worker": "background.js"
+        },
     "content_scripts": [
     {
         "matches": ["<all_urls>"],
-        // "css": ["myStyles.css"],
         "js": ["mark.es6.js", "content.js"]
     }],
 
@@ -29,7 +25,9 @@
         "notifications",
         "contextMenus",
         "tabs",
-        "activeTab",
+        "activeTab"
+    ],
+    "host_permissions": [
         "https://www.google.com/",
         "https://od-api.oxforddictionaries.com/*"
     ]
