@@ -1,155 +1,129 @@
-const appId = 'cca24fe8';
-const appKey = '5da9afd01fd6bbf783145888c25477e8';
-const language = 'en';
+const language = "en";
 
-let dictionary;
+let dictionary = [];
 
+// Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'Save',
-    title: 'Save word',
-    contexts: ['selection']
+    id: "Save",
+    title: "Save word",
+    contexts: ["selection"],
+  });
+  initDict();
+
+  // Request notification permission when extension is installed
+  chrome.notifications.getPermissionLevel((level) => {
+    if (level !== "granted") {
+      chrome.notifications.requestPermission();
+    }
   });
 });
 
-initDict();
-
-chrome.runtime.onMessage.addListener((request) => {
-  dictionary = request.message;
-  saveDict();
+// Listen for messages from content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.message) {
+    dictionary = request.message;
+    saveDict();
+  }
+  return true; // Keep the message channel open for async response
 });
 
+// Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((clickData) => {
-  const wordObject = {};
-  // console.log(dictionary);
-  getHeadWord('inflections', clickData.selectionText)
-    .then((data) => {
-      const inflection = data.results[0].lexicalEntries[0].inflectionOf[0].id;
-      const check = checkForWord(inflection);
+  const word = clickData.selectionText.toLowerCase().trim();
+  const check = checkForWord(word);
 
-      if (check !== true) {
-        getDefinition('entries', inflection)
-          .then((passData) => {
-            wordObject.definition = passData;
-            const text = passData.results[0].id;
-            getSynonyms('entries', text)
-              .then((passData2) => {
-                wordObject.synonyms = passData2;
-                addWordToDictAndSave(wordObject);
-              })
-              .catch(() => {
-                addWordToDictAndSave(wordObject);
-              });
+  if (check !== true) {
+    getWordDefinition(word)
+      .then((wordData) => {
+        if (wordData && wordData.length > 0) {
+          const wordObject = {
+            definition: wordData[0],
+            synonyms: wordData[0].meanings
+              .flatMap((meaning) => meaning.definitions)
+              .filter((def) => def.synonyms)
+              .flatMap((def) => def.synonyms),
+          };
+          addWordToDictAndSave(wordObject);
+        }
+      })
+      .catch((error) => {
+        // Only show error notification if it's not a "word not found" error
+        if (error.message !== "Word not found") {
+          showNotification({
+            type: "basic",
+            iconUrl: "icons/icon128.png",
+            title: "Error",
+            message:
+              "There was an error fetching the word definition. Please try again.",
           });
-      } else {
-        moveWordToTop(inflection);
-      }
-    });
+        }
+        console.error("Error processing word:", error);
+      });
+  } else {
+    moveWordToTop(word);
+  }
 });
 
-function initDict() {
-  chrome.storage.local.set({
-    dictionary
+// Helper function to show notifications with permission check
+function showNotification(notificationOptions) {
+  chrome.notifications.getPermissionLevel((level) => {
+    if (level === "granted") {
+      chrome.notifications.create(notificationOptions);
+    } else {
+      // If notifications aren't granted, show a message in the console
+      console.log(
+        "Notifications are disabled. Please enable them in Chrome settings."
+      );
+    }
   });
-  chrome.storage.local.get({
-    dictionary: []
-  }, (data) => {
-    dictionary = data.dictionary;
-  });
 }
 
-function getHeadWord(type, word) {
-  const wordFormat = word.toLowerCase().trim();
-  const search = `https://od-api.oxforddictionaries.com/api/v1/${type}/${language}/${fixedEncodeURIComponent(wordFormat)}`;
-
-  const promiseObj = new Promise(((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', search, true);
-    xhr.setRequestHeader('app_key', appKey);
-    xhr.setRequestHeader('app_id', appId);
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.send();
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          const respJson = JSON.parse(xhr.responseText);
-          resolve(respJson);
-        } else {
-          reject(xhr.status);
-        }
-      }
-    };
-  }));
-  return promiseObj;
+async function initDict() {
+  try {
+    const data = await chrome.storage.local.get("dictionary");
+    dictionary = data.dictionary || [];
+  } catch (error) {
+    console.error("Error initializing dictionary:", error);
+    dictionary = [];
+  }
 }
 
-function getDefinition(type, word) {
-  const wordFormat = word.toLowerCase().trim();
-  const search = `https://od-api.oxforddictionaries.com/api/v1/${type}/${language}/${fixedEncodeURIComponent(wordFormat)}`;
+async function getWordDefinition(word) {
+  try {
+    const response = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+        word
+      )}`
+    );
 
-  const promiseObj = new Promise(((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', search, true);
-    xhr.setRequestHeader('app_key', appKey);
-    xhr.setRequestHeader('app_id', appId);
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.send();
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          const respJson = JSON.parse(xhr.responseText);
-          resolve(respJson);
-        } else {
-          reject(xhr.status);
-        }
+    if (!response.ok) {
+      if (response.status === 404) {
+        // Show notification that word wasn't found
+        showNotification({
+          type: "basic",
+          iconUrl: "icons/icon128.png",
+          title: "Word Not Found",
+          message: `"${word}" was not found in the dictionary. Please check the spelling or try a different word.`,
+        });
+        throw new Error("Word not found");
       }
-    };
-  }));
-  return promiseObj;
-}
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-function getSynonyms(type, word) {
-  const wordFormat = word.toLowerCase().trim();
-  const search = `https://od-api.oxforddictionaries.com/api/v1/${type}/${language}/${fixedEncodeURIComponent(wordFormat)}/synonyms`;
-
-  const promiseObj = new Promise(((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', search, true);
-    xhr.setRequestHeader('app_key', appKey);
-    xhr.setRequestHeader('app_id', appId);
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.send();
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          const respJson = JSON.parse(xhr.responseText);
-          resolve(respJson);
-        } else {
-          reject(xhr.status);
-        }
-      }
-    };
-  }));
-  return promiseObj;
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching word definition:", error);
+    throw error;
+  }
 }
 
 function checkForWord(word) {
-  for (const key of dictionary) {
-    if (key.definition.results[0].id === word) {
-      // console.log('word exists in array');
-      return true;
-    }
-  }
-  // console.log("word doesn't exist in array");
-  return false;
+  return dictionary.some((key) => key.definition.word === word);
 }
 
 function moveWordToTop(word) {
   const index = getIndex(word);
-
   if (index !== -1) {
     dictionary.unshift(dictionary.splice(index, 1)[0]);
     saveDict();
@@ -157,16 +131,7 @@ function moveWordToTop(word) {
 }
 
 function getIndex(word) {
-  for (let i = 0; i < dictionary.length; i += 1) {
-    if (dictionary[i].definition.results[0].id === word) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function fixedEncodeURIComponent(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, c => `%' ${c.charCodeAt(0).toString(16)}`);
+  return dictionary.findIndex((item) => item.definition.word === word);
 }
 
 function addWordToDictAndSave(newWord) {
@@ -174,8 +139,10 @@ function addWordToDictAndSave(newWord) {
   saveDict();
 }
 
-function saveDict() {
-  chrome.storage.local.set({
-    dictionary
-  });
+async function saveDict() {
+  try {
+    await chrome.storage.local.set({ dictionary });
+  } catch (error) {
+    console.error("Error saving dictionary:", error);
+  }
 }

@@ -1,34 +1,32 @@
 {
-    "manifest_version": 3,
-    "name": "Little Dictionary",
-    "author": "Mo Amer, First of his Name",
-    "description": "Save words you find on your travels",
-    "version": "1.0",
-
-    "action":
+  "manifest_version": 3,
+  "name": "Little Dictionary",
+  "author": "Mo Amer, First of his Name",
+  "description": "Save words you find on your travels",
+  "version": "1.0",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
     {
-        "default_popup": "popup.html"
-
-    },
-
-    "background": {
-        "service_worker": "background.js"
-        },
-    "content_scripts": [
-    {
-        "matches": ["<all_urls>"],
-        "js": ["mark.es6.js", "content.js"]
-    }],
-
-    "permissions": [
-        "storage",
-        "notifications",
-        "contextMenus",
-        "tabs",
-        "activeTab"
-    ],
-    "host_permissions": [
-        "https://www.google.com/",
-        "https://od-api.oxforddictionaries.com/*"
-    ]
+      "matches": ["<all_urls>"],
+      "js": ["mark.es6.js", "content.js"]
+    }
+  ],
+  "permissions": ["storage", "notifications", "contextMenus", "activeTab"],
+  "host_permissions": ["https://api.dictionaryapi.dev/*"]
 }

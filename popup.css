@@ -36,90 +36,102 @@ div {
     max-height: 85px;
     margin-bottom: 2px;
     background: ghostwhite;
-    transition: background .3s;
-    -webkit-transition: background .3s;
-    -moz-transition: background .3s;
+    transition: all .3s ease;
+    -webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    border: 2px solid #90caf9;
+    border-radius: 4px;
 }
 
 .collapsible.expand {
-    /*transition: all .3s ease;*/
-     max-height: none;     
+    max-height: none;     
 }
 
 .collapsible:hover {
-    /*border-style: solid;*/
-    /*border-color: orange;*/
-    /*border-width: 1.5px;*/
     cursor: pointer;
 }
 
-/*.smalldesc {
-  max-height: 52px;
-  overflow: hidden;
-  
-}*/
-
 .content {
-    /*white-space: nowrap;*/
-    padding: 20px;
+    padding: 12px 20px;
     padding-bottom: 0px;
     box-sizing: border-box;
     float: left;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    border: none;
 }
 
-.content:hover .remove {
-    visibility: visible;
+/* Add styles for the minimized view */
+.collapsible:not(.expand) .content {
+    max-height: 85px;
+    overflow: hidden;
+    padding: 12px 20px 0 20px;
+}
+
+.collapsible:not(.expand) .word,
+.collapsible:not(.expand) .phonetic {
+    display: block;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+.collapsible:not(.expand) .type,
+.collapsible:not(.expand) .definition,
+.collapsible:not(.expand) .example,
+.collapsible:not(.expand) .synonym {
+    display: none;
 }
 
 .word {
     display: inline-block;
     font-size: 1.7em;
+    margin-bottom: 0;
 }
-
 
 .phonetic {
     display: inline-block;
-    font-size: 1.2em
+    font-size: 1.2em;
+    margin-bottom: 0;
+    line-height: 1.2;
 }
 
 .example {
     color: grey;
+    margin-bottom: 5px;
 }
 
 .reference {
     color: black;
+    margin-bottom: 5px;
 }
 
 .type {
     font-size: 1.2em;
+    margin-bottom: 5px;
+    color: #666;
 }
 
 .synonym {
     display: inline-block;
     width: 100%;
     color: grey;
-    /*overflow-wrap: break-word;*/
-    /*text-overflow: wrap ;*/
-    /*white-space: nowrap;*/
+    margin-bottom: 5px;
 }
 
 .remove {
     visibility: hidden;
     display: inline-block;
-    position: relative;
-    float: right;
-    right: 0px;
-    top: 6px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
     width: 24px;
     height: 24px;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2;
     cursor: pointer;
-    /*z-index: 1000;*/
+    z-index: 2;
 }
 
 .remove:hover .feather {
@@ -127,19 +139,52 @@ div {
     transition: 300ms;
 }
 
-.arrow-container {
+.expand-indicator {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
 
-    padding: 1px;
-    padding-bottom: 0px
+.collapsible.expand .expand-indicator {
+    transform: rotate(45deg);
+}
+
+.expand-indicator::before,
+.expand-indicator::after {
+    content: '';
+    position: absolute;
+    background-color: #666;
+    transition: background-color 0.3s ease;
+}
+
+.expand-indicator::before {
+    width: 2px;
+    height: 12px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.expand-indicator::after {
+    width: 12px;
+    height: 2px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.collapsible:hover .expand-indicator::before,
+.collapsible:hover .expand-indicator::after {
+    background-color: #4285f4;
 }
 
 .feather {
-    /*stroke:#c3c6cc;*/
     stroke: grey;
     position: relative;
-    right: 12px;
     float: right;
-
 }
 
 .feather:hover {
@@ -157,7 +202,7 @@ div {
 ::-webkit-scrollbar {
     width: 4px;
 }
-s
+
 ::-webkit-scrollbar-thumb {
     width: 4px;
     border-radius: 8px;
@@ -167,7 +212,6 @@ s
 /* Add a black background color to the top navigation bar */
 .topnav {
     overflow: hidden;
-    /*background-color: #e9e9e9;*/
 }
 
 /* Style the links inside the navigation bar */
@@ -176,17 +220,9 @@ s
     display: block;
     color: black;
     text-align: center;
-    /*padding: 14px 16px;*/
     text-decoration: none;
     font-size: 18px;
-
 }
-
-/* Change the color of links on hover */
-/*.topnav a:hover {
-  background-color: orange;
-  color: black;
-}*/
 
 /* Style the "active" element to highlight the current page */
 .topnav a.active {
@@ -202,15 +238,11 @@ s
     outline: none;
     width: 80%;
     height: 22px;
-
     border-radius: 30px;
     border: solid;
     border-width: 1.5px;
     border-color: grey;
-
     font-size: 16px;
-    /*font-weight: 500;*/
-
 }
 
 /*hide top container on scroll?*/
@@ -232,3 +264,42 @@ s
   }
 }
 */
+
+.highlight {
+    background-color: #ffeb3b;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.highlight-word {
+    background-color: #e3f2fd;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* Add styles for search highlighting */
+.search-highlight {
+    background-color: #ff9800;
+    padding: 0 2px;
+    border-radius: 2px;
+    display: inline-block;
+    animation: highlightPop 0.1s ease-out;
+    transform-origin: center;
+}
+
+@keyframes highlightPop {
+    0% {
+        transform: scale(1.2);
+        background-color: #ff5722;
+    }
+    100% {
+        transform: scale(1);
+        background-color: #ff9800;
+    }
+}
+
+.search-highlight-word {
+    background-color: #e3f2fd;
+    padding: 0 2px;
+    border-radius: 2px;
+}
